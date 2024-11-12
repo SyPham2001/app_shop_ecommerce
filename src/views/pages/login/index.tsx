@@ -113,7 +113,7 @@ const LoginPage: NextPage<TProps> = () => {
         <Image
           src={theme.palette.mode === 'light' ? LoginLight : LoginDark}
           alt='login image'
-          width={500} // Đặt kích thước mong muốn
+          width={400} // Đặt kích thước mong muốn
           height={400}
         />
       </Box>
