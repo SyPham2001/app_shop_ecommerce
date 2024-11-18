@@ -29,9 +29,7 @@ type TListItems = {
   disabled: boolean
 }
 
-const RecursiveListItems: NextPage<TListItems> = ({ items, level, disabled }) => {
-  const [openItems, setOpenItems] = useState<{ [key: string]: boolean }>({})
-
+const RecursiveListItems: NextPage<TListItems> = ({ items, level, openItems, setOpenItems, disabled }) => {
   const handleClick = (title: string) => {
     if (!disabled) {
       setOpenItems(prev => ({
@@ -48,7 +46,7 @@ const RecursiveListItems: NextPage<TListItems> = ({ items, level, disabled }) =>
           <React.Fragment key={item.title}>
             <ListItemButton
               sx={{
-                paddingLeft: `${level * 20}px`
+                padding: `8px 10px 8px ${level * 20}px`
               }}
               onClick={() => {
                 if (item.childrens) {
@@ -75,14 +73,14 @@ const RecursiveListItems: NextPage<TListItems> = ({ items, level, disabled }) =>
                   )}
                 </>
               )}
-            </ListItemButton> 
+            </ListItemButton>
             {item.childrens && item.childrens.length > 0 && (
               <>
                 {item.childrens.map((child: any) => {
                   return (
                     <Collapse key={child.icon} in={openItems[item.title]} timeout='auto' unmountOnExit>
                       <RecursiveListItems
-                        disabled={!open}
+                        disabled={disabled}
                         openItems={openItems}
                         setOpenItems={setOpenItems}
                         items={item.childrens}

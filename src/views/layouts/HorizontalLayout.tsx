@@ -14,6 +14,7 @@ import { IconButton } from '@mui/material'
 
 // component
 import IconifyIcon from 'src/components/Icon'
+import UserDropDown from 'src/components/user-dropdown'
 
 const drawerWidth: number = 240
 
@@ -33,7 +34,7 @@ const AppBar = styled(MuiAppBar, {
   zIndex: theme.zIndex.drawer + 1,
   backgroundColor:
     theme.palette.mode === 'light' ? theme.palette.customColors.lightPaperBg : theme.palette.customColors.darkPaperBg,
-  color: theme.palette.text.primary,
+  color: theme.palette.primary.main,
   transition: theme.transitions.create(['width', 'margin'], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen
@@ -53,7 +54,7 @@ const HorizontalLayout: NextPage<TProps> = ({ open, toggleDrawer, isHideMenu }) 
     <AppBar position='absolute' open={open}>
       <Toolbar
         sx={{
-          pr: '24px',
+          pr: '30px',
           margin: '0 20px'
         }}
       >
@@ -76,11 +77,12 @@ const HorizontalLayout: NextPage<TProps> = ({ open, toggleDrawer, isHideMenu }) 
         <Typography component='h1' variant='h6' color='inherit' noWrap sx={{ flexGrow: 1 }}>
           Dashboard
         </Typography>
-        <IconButton color='inherit'>
+        <UserDropDown />
+        {/* <IconButton color='inherit'>
           <Badge badgeContent={4} color='primary'>
             <IconifyIcon icon='iconamoon:notification-light' />
           </Badge>
-        </IconButton>
+        </IconButton> */}
       </Toolbar>
     </AppBar>
   )
