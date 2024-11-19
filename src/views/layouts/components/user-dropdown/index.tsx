@@ -13,7 +13,7 @@ import Divider from '@mui/material/Divider'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
 import Tooltip from '@mui/material/Tooltip'
-import IconifyIcon from '../Icon'
+import IconifyIcon from 'src/components/Icon'
 
 //**Hooks */
 import { useAuth } from 'src/hooks/useAuth'
