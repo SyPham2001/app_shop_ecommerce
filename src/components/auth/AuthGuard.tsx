@@ -12,7 +12,9 @@ interface AuthGuardProps {
 
 const AuthGuard = (props: AuthGuardProps) => {
   const { children, fallback } = props
+  //**auth */
   const authContext = useAuth()
+  //**router */
   const router = useRouter()
 
   useEffect(() => {
@@ -32,8 +34,13 @@ const AuthGuard = (props: AuthGuardProps) => {
       } else {
         router.replace('/login')
       }
+      authContext.setUser(null)
+      clearLocalUserData()
     }
-  }, [])
+  }, [router.route])
+  if (authContext.loading || authContext.user === null) {
+    return fallback
+  }
 
   return <>{children}</>
 }
