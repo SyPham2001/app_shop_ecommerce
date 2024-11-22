@@ -16,6 +16,7 @@ import { IconButton } from '@mui/material'
 import IconifyIcon from 'src/components/Icon'
 import ModeToggle from './components/mode-toggle'
 import UserDropDown from './components/user-dropdown'
+import LanguageDropDown from './components/language-dropdown'
 
 const drawerWidth: number = 240
 
@@ -78,6 +79,7 @@ const HorizontalLayout: NextPage<TProps> = ({ open, toggleDrawer, isHideMenu }) 
         <Typography component='h1' variant='h6' color='inherit' noWrap sx={{ flexGrow: 1 }}>
           Dashboard
         </Typography>
+        <LanguageDropDown />
         <ModeToggle />
         <UserDropDown />
         {/* <IconButton color='inherit'>
