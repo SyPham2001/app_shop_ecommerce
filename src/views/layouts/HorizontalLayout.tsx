@@ -10,13 +10,16 @@ import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import Badge from '@mui/material/Badge'
-import { IconButton } from '@mui/material'
+import { Button, IconButton } from '@mui/material'
 
 // component
 import IconifyIcon from 'src/components/Icon'
 import ModeToggle from './components/mode-toggle'
 import UserDropDown from './components/user-dropdown'
 import LanguageDropDown from './components/language-dropdown'
+import { useAuth } from 'src/hooks/useAuth'
+import { useRouter } from 'next/router'
+import { useTranslation } from 'react-i18next'
 
 const drawerWidth: number = 240
 
@@ -52,6 +55,24 @@ const AppBar = styled(MuiAppBar, {
 }))
 
 const HorizontalLayout: NextPage<TProps> = ({ open, toggleDrawer, isHideMenu }) => {
+  
+  const { user } = useAuth()
+
+  const router = useRouter()
+
+  const { t } = useTranslation()
+
+  const handleNavigateLogin = () => {
+    if (router.asPath !== '/') {
+      router.replace({
+        pathname: '/login',
+        query: { returnUrl: router.asPath }
+      })
+    } else {
+      router.replace('/login')
+    }
+  }
+
   return (
     <AppBar position='absolute' open={open}>
       <Toolbar
@@ -81,12 +102,13 @@ const HorizontalLayout: NextPage<TProps> = ({ open, toggleDrawer, isHideMenu }) 
         </Typography>
         <LanguageDropDown />
         <ModeToggle />
-        <UserDropDown />
-        {/* <IconButton color='inherit'>
-          <Badge badgeContent={4} color='primary'>
-            <IconifyIcon icon='iconamoon:notification-light' />
-          </Badge>
-        </IconButton> */}
+        {user ? (
+          <UserDropDown />
+        ) : (
+          <Button variant='contained' sx={{ ml: 2, width: 'auto' }} onClick={handleNavigateLogin}>
+            Sign In 
+          </Button>
+        )}
       </Toolbar>
     </AppBar>
   )
