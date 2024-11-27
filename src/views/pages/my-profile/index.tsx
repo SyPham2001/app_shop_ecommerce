@@ -3,7 +3,19 @@ import Image from 'next/image'
 import { NextPage } from 'next'
 
 //Mui
-import { Box, Button, CssBaseline, IconButton, InputAdornment, Link, Typography, useTheme } from '@mui/material'
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CssBaseline,
+  Grid,
+  IconButton,
+  InputAdornment,
+  Link,
+  Typography,
+  useTheme
+} from '@mui/material'
 
 // form
 import { Controller, useForm } from 'react-hook-form'
@@ -21,202 +33,272 @@ import { useState } from 'react'
 // Image
 import RegisterDark from '../../../../public/images/register-dark.png'
 import RegisterLight from '../../../../public/images/register-light.png'
+import IconifyIcon from 'src/components/Icon'
+import { useTranslation } from 'react-i18next'
+import WrapperFileUpload from 'src/components/wrapper-file-upload'
+import { useAuth } from 'src/hooks/useAuth'
 
 type TProps = {}
 
 type TDefaultValue = {
   email: string
-  password: string
-  confirmPassword: string
+  address: string
+  city: string
+  phoneNumber: string
+  role: string
+  fullName: string
 }
 
 const MyProfilePage: NextPage<TProps> = () => {
-  // state
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  // State
+  const [loading, setLoading] = useState(false)
+  const [avatar, setAvatar] = useState('')
+  const [optionRoles, setOptionRoles] = useState<{ label: string; value: string }[]>([])
+  const [isDisabledRole, setIsDisabledRole] = useState(false)
+  const [optionCities, setOptionCities] = useState<{ label: string; value: string }[]>([])
+  const { user } = useAuth()
 
   //theme
   const theme = useTheme()
 
+  //translate
+  const { t } = useTranslation()
+
   const schema = yup.object({
     email: yup.string().required('the field is required').matches(EMAIL_REG, 'the email is must email type'),
-    password: yup
-      .string()
-      .required('the field is required')
-      .matches(PASSWORD_REG, 'the password is contain charactor,special charactor,number'),
-    confirmPassword: yup
-      .string()
-      .required('the field is required')
-      .matches(PASSWORD_REG, 'the password is contain charactor,special charactor,number')
-      .oneOf([yup.ref('password'), ''], 'the confirm is must match with password')
+    fullName: yup.string().notRequired(),
+    phoneNumber: yup.string().required(t('Required_field')).min(9, 'The phone number is min 9 number'),
+    role: isDisabledRole ? yup.string().notRequired() : yup.string().required(t('Required_field')),
+    city: yup.string().notRequired(),
+    address: yup.string().notRequired()
   })
 
   const defaultValues: TDefaultValue = {
     email: '',
-    password: '',
-    confirmPassword: ''
+    address: '',
+    city: '',
+    phoneNumber: '',
+    role: '',
+    fullName: ''
   }
 
   const {
     handleSubmit,
     control,
-    formState: { errors }
+    formState: { errors },
+    reset,
+    watch
   } = useForm({
     defaultValues,
     mode: 'onBlur',
     resolver: yupResolver(schema)
   })
 
-  const onSubmit = (data: { email: string; password: string }) => {
+  const onSubmit = (data: any) => {
     console.log('data', data)
   }
+  const handleUploadAvatar = (file: File) => {}
 
   return (
     <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
-      <Box sx={{ mt: 2, width: '300px' }}>
-        <Controller
-          control={control}
-          rules={{
-            required: true
-          }}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <CustomTextField
-              required
-              fullWidth
-              label='Email *'
-              onChange={onChange}
-              value={value}
-              onBlur={onBlur}
-              error={Boolean(errors?.email)}
-              placeholder='input email'
-              helperText={errors?.email?.message}
-            />
-          )}
-          name='email'
-        />
-      </Box>
-      <Box sx={{ mt: 2, width: '300px' }}>
-        <Controller
-          control={control}
-          rules={{
-            required: true
-          }}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <CustomTextField
-              required
-              fullWidth
-              label='Password *'
-              onChange={onChange}
-              value={value}
-              onBlur={onBlur}
-              error={Boolean(errors?.password)}
-              placeholder='input password'
-              helperText={errors?.password?.message}
-              type={showPassword ? 'text' : 'password'}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position='end'>
-                    <IconButton edge='end' onClick={() => setShowPassword(!showPassword)}>
-                      {showPassword ? (
-                        <Icon icon='material-symbols:visibility-outline' />
-                      ) : (
-                        <Icon icon='material-symbols-light:visibility-off-outline' />
-                      )}
-                    </IconButton>
-                  </InputAdornment>
-                )
-              }}
-            />
-          )}
-          name='password'
-        />
-      </Box>
-
-      <Box sx={{ mt: 2, width: '300px' }}>
-        <Controller
-          control={control}
-          rules={{
-            required: true
-          }}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <CustomTextField
-              required
-              fullWidth
-              label={'Confirm_password'}
-              onChange={onChange}
-              onBlur={onBlur}
-              value={value}
-              placeholder={'Enter_confirm_password'}
-              error={Boolean(errors?.confirmPassword)}
-              helperText={errors?.confirmPassword?.message}
-              type={showConfirmPassword ? 'text' : 'password'}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position='end'>
-                    <IconButton edge='end' onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
-                      {showConfirmPassword ? (
-                        <Icon icon='material-symbols:visibility-outline' />
-                      ) : (
-                        <Icon icon='ic:outline-visibility-off' />
-                      )}
-                    </IconButton>
-                  </InputAdornment>
-                )
-              }}
-            />
-          )}
-          name='confirmPassword'
-        />
-      </Box>
-
-      <Button type='submit' fullWidth variant='contained' color='primary' sx={{ mt: 3, mb: 2 }}>
-        Register
-      </Button>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-        <Typography>{'You_have_account'}</Typography>
-        <Link
-          href='/login'
-          style={{
-            color: theme.palette.primary.main
-          }}
+      <Grid container>
+        <Grid
+          container
+          item
+          md={6}
+          xs={12}
+          sx={{ backgroundColor: theme.palette.background.paper, borderRadius: '15px', py: 5, px: 4 }}
         >
-          {'Login'}
-        </Link>
-      </Box>
-      <Typography sx={{ textAlign: 'center', mt: 2, mb: 2 }}>{'Or'}</Typography>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-        <IconButton sx={{ color: '#497ce2' }}>
-          <svg
-            xmlns='http://www.w3.org/2000/svg'
-            role='img'
-            fontSize='1.375rem'
-            className='iconify iconify--mdi'
-            width='1em'
-            height='1em'
-            viewBox='0 0 24 24'
+          <Box
+            sx={{
+              height: '100%',
+              width: '100%'
+            }}
           >
-            <path
-              fill='currentColor'
-              d='M12 2.04c-5.5 0-10 4.49-10 10.02c0 5 3.66 9.15 8.44 9.9v-7H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.89 3.78-3.89c1.09 0 2.23.19 2.23.19v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.9h-2.33v7a10 10 0 0 0 8.44-9.9c0-5.53-4.5-10.02-10-10.02Z'
-            ></path>
-          </svg>
-        </IconButton>
-        <IconButton sx={{ color: theme.palette.error.main }}>
-          <svg
-            xmlns='http://www.w3.org/2000/svg'
-            role='img'
-            fontSize='1.375rem'
-            className='iconify iconify--mdi'
-            width='1em'
-            height='1em'
-            viewBox='0 0 24 24'
+            <Grid container spacing={4}>
+              <Grid item md={12} xs={12}>
+                <Box
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexDirection: 'column',
+                    gap: 2
+                  }}
+                >
+                  <Avatar sx={{ width: 100, height: 100 }}>
+                    {/* {user?.avatar ? (
+                  <Image
+                    src={user?.avatar || ''}
+                    alt='avatar'
+                    style={{
+                      height: 'auto',
+                      width: 'auto'
+                    }}
+                  />
+                ) : ( */}
+                    <IconifyIcon icon='ph:user-thin' />
+                    {/* )} */}
+                  </Avatar>
+                  <WrapperFileUpload
+                    uploadFunc={handleUploadAvatar}
+                    objectAcceptFile={{
+                      'image/jpeg': ['.jpg', '.jpeg'],
+                      'image/png': ['.png']
+                    }}
+                  >
+                    <Button variant='outlined' sx={{ width: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Icon icon='ph:camera-thin'></Icon>
+                      {avatar ? t('Change_avatar') : t('Upload_avatar')}
+                    </Button>
+                  </WrapperFileUpload>
+                </Box>
+              </Grid>
+              <Grid item md={6} xs={12}>
+                <Controller
+                  control={control}
+                  rules={{
+                    required: true
+                  }}
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <CustomTextField
+                      required
+                      fullWidth
+                      label={t('Email')}
+                      onChange={onChange}
+                      value={value}
+                      onBlur={onBlur}
+                      error={Boolean(errors?.email)}
+                      placeholder={t('Enter_your_email')}
+                      helperText={errors?.email?.message}
+                    />
+                  )}
+                  name='email'
+                />
+              </Grid>
+              <Grid item md={6} xs={12}>
+                <Controller
+                  control={control}
+                  rules={{
+                    required: true
+                  }}
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <CustomTextField
+                      required
+                      autoFocus
+                      fullWidth
+                      disabled
+                      label={t('Role')}
+                      onChange={onChange}
+                      value={value}
+                      onBlur={onBlur}
+                      error={Boolean(errors?.role)}
+                      placeholder={t('Enter_your_role')}
+                      helperText={errors?.role?.message}
+                    />
+                  )}
+                  name='role'
+                />
+              </Grid>
+            </Grid>
+          </Box>
+        </Grid>
+        <Grid container item md={6} xs={12} mt={{ md: 0, xs: 5 }}>
+          <Box
+            sx={{
+              height: '100%',
+              width: '100%',
+              backgroundColor: theme.palette.background.paper,
+              borderRadius: '15px',
+              py: 5,
+              px: 4
+            }}
+            marginLeft={{
+              md: 5,
+              xs: 0
+            }}
           >
-            <path
-              fill='currentColor'
-              d='M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27c3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10c5.35 0 9.25-3.67 9.25-9.09c0-1.15-.15-1.81-.15-1.81Z'
-            ></path>
-          </svg>
-        </IconButton>
+            <Grid container spacing={4}>
+              <Grid item md={6} xs={12}>
+                <Controller
+                  control={control}
+                  rules={{
+                    required: true
+                  }}
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <CustomTextField
+                      fullWidth
+                      label={t('Full_name')}
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      value={value}
+                      placeholder={t('Enter_your_full_name')}
+                    />
+                  )}
+                  name='fullName'
+                />
+              </Grid>
+              <Grid item md={6} xs={12}>
+                <Controller
+                  control={control}
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <CustomTextField
+                      fullWidth
+                      label={t('Address')}
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      value={value}
+                      placeholder={t('Enter_your_address')}
+                    />
+                  )}
+                  name='address'
+                />
+              </Grid>
+              <Grid item md={6} xs={12}>
+                <Controller
+                  control={control}
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <CustomTextField
+                      fullWidth
+                      onChange={onChange}
+                      label={t('City')}
+                      onBlur={onBlur}
+                      value={value}
+                      placeholder={t('Enter_your_city')}
+                    />
+                  )}
+                  name='city'
+                />
+              </Grid>
+              <Grid item md={6} xs={12}>
+                <Controller
+                  control={control}
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <CustomTextField
+                      fullWidth
+                      label={t('Phone_number')}
+                      onChange={onChange}
+                      value={value}
+                      onBlur={onBlur}
+                      error={Boolean(errors?.phoneNumber)}
+                      placeholder={t('Enter_your_phone')}
+                      helperText={errors?.phoneNumber?.message}
+                    />
+                  )}
+                  name='phoneNumber'
+                />
+              </Grid>
+            </Grid>
+          </Box>
+        </Grid>
+      </Grid>
+
+      <Box sx={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'flex-end' }}>
+        <Button type='submit' variant='contained' sx={{ mt: 3, mb: 2 }}>
+          {t('Update')}
+        </Button>
       </Box>
     </form>
   )
