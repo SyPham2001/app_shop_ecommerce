@@ -32,6 +32,24 @@ export const clearLocalUserData = () => {
   }
 }
 
+export const setTemporaryToken = (accessToken: string) => {
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(TEMPORARY_TOKEN, accessToken)
+  }
+}
+
+export const getTemporaryToken = () => {
+  if (typeof window !== 'undefined') {
+    return {
+      temporaryToken: window.localStorage.getItem(TEMPORARY_TOKEN)
+    }
+  }
+
+  return {
+    temporaryToken: ''
+  }
+}
+
 export const clearTemporaryToken = () => {
   if (typeof window !== 'undefined') {
     window.localStorage.removeItem(TEMPORARY_TOKEN)

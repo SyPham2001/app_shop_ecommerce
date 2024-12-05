@@ -35,6 +35,8 @@ import LoginLight from '../../../../public/images/login-light.png'
 // hook
 import { useAuth } from 'src/hooks/useAuth'
 import { useState } from 'react'
+import toast from 'react-hot-toast'
+import { t } from 'i18next'
 
 type TProps = {}
 
@@ -70,6 +72,7 @@ const LoginPage: NextPage<TProps> = () => {
   const {
     handleSubmit,
     control,
+    setError,
     formState: { errors }
   } = useForm({
     defaultValues,
@@ -80,9 +83,11 @@ const LoginPage: NextPage<TProps> = () => {
 
   const onSubmit = (data: { email: string; password: string }) => {
     if (!Object.keys(errors)?.length) {
-      login({ ...data, rememberMe: isRemember })
+      login({ ...data, rememberMe: isRemember }, err => {
+        if (err?.response?.data?.typeError === 'INVALID') toast.error(t('The_email_or_password_wrong'))
+      })
     }
-    console.log('data', data)
+    // console.log('data', data)
   }
 
   return (
@@ -193,9 +198,12 @@ const LoginPage: NextPage<TProps> = () => {
               <FormControlLabel
                 control={
                   <Checkbox
+                    name='rememberMe'
                     checked={isRemember}
-                    onChange={e => setIsRemember(e.target.checked)}
-                    value='remember'
+                    onChange={e => {
+                      setIsRemember(e.target.checked)
+                      // setLocalRememberLoginAuthSocial(JSON.stringify(e.target.checked))
+                    }}
                     color='primary'
                   />
                 }

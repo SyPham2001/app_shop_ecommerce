@@ -14,8 +14,10 @@ import authConfig from 'src/configs/auth'
 import { AuthValuesType, LoginParams, ErrCallbackType, UserDataType } from './types'
 import { loginAuth, logoutAuth } from 'src/services/auth'
 import { CONFIG_API } from 'src/configs/api'
-import { clearLocalUserData, setLocalUserData } from 'src/helpers/storage'
+import { clearLocalUserData, setLocalUserData, setTemporaryToken } from 'src/helpers/storage'
 import instanceAxios from 'src/helpers/axios'
+import toast from 'react-hot-toast'
+import { t } from 'i18next'
 
 // ** Defaults
 const defaultProvider: AuthValuesType = {
@@ -70,28 +72,24 @@ const AuthProvider = ({ children }: Props) => {
   }, [])
 
   const handleLogin = (params: LoginParams, errorCallback?: ErrCallbackType) => {
-    setLoading(true)
     loginAuth({ email: params.email, password: params.password })
       .then(async response => {
-        setLoading(false)
-        params.rememberMe
-          ? setLocalUserData(
-              JSON.stringify(response.data.user),
-              response.data.access_token,
-              response.data.refresh_token
-            )
-          : null
+        if (params.rememberMe) {
+          setLocalUserData(JSON.stringify(response.data.user), response.data.access_token, response.data.refresh_token)
+        } else {
+          setTemporaryToken(response.data.access_token)
+        }
+
+        toast.success(t('Login_success'))
+
         const returnUrl = router.query.returnUrl
-
         setUser({ ...response.data.user })
-
         const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
 
         router.replace(redirectURL as string)
       })
 
       .catch(err => {
-        setLoading(false)
         if (errorCallback) errorCallback(err)
       })
   }

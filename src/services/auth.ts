@@ -5,20 +5,18 @@ import { API_ENDPOINT, CONFIG_API } from 'src/configs/api'
 import instanceAxios from 'src/helpers/axios'
 
 //** types */
-import { TLoginAuth, TRegisterAuth } from 'src/types/auth'
+import { TChangePassword, TLoginAuth, TRegisterAuth } from 'src/types/auth'
 
 export const loginAuth = async (data: TLoginAuth) => {
-  try {
-    const res = await instanceAxios.post(`${CONFIG_API.AUTH.INDEX}/login`, data)
-    return res.data
-  } catch (error) {
-    return null
-  }
+  const res = await axios.post(`${API_ENDPOINT.AUTH.INDEX}/login`, data)
+
+  return res.data 
 }
 
 export const logoutAuth = async () => {
   try {
-    const res = await instanceAxios.post(`${CONFIG_API.AUTH.INDEX}/logout`)
+    const res = await instanceAxios.post(`${API_ENDPOINT.AUTH.INDEX}/logout`)
+
     return res.data
   } catch (error) {
     return null
@@ -35,6 +33,30 @@ export const getAuthMe = async () => {
 }
 
 export const registerAuth = async (data: TRegisterAuth) => {
-  const res = await axios.post(`${CONFIG_API.AUTH.INDEX}/register`, data)
-  return res.data
+  try {
+    const res = await axios.post(`${API_ENDPOINT.AUTH.INDEX}/register`, data)
+
+    return res.data
+  } catch (error) {
+    return error
+  }
+}
+
+export const updateAuthMe = async (data: any) => {
+  try {
+    const res = await instanceAxios.put(`${API_ENDPOINT.AUTH.INDEX}/me`, data)
+
+    return res.data
+  } catch (error) {
+    return error
+  }
+}
+
+export const changePasswordMe = async (data : TChangePassword) => {
+  try {
+    const res = await instanceAxios.patch(`${API_ENDPOINT.AUTH.INDEX}/change-password`,data)
+    return res.data
+  } catch (error) {
+    return error
+  }
 }

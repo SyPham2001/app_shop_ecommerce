@@ -8,3 +8,8 @@ export type TRegisterAuth = {
   password: string
 }
 
+export type TChangePassword = {
+  currentPassword : string,
+  newPassword : string
+}
+

@@ -20,12 +20,44 @@ import { useAuth } from 'src/hooks/useAuth'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/router'
 import { ROUTE_CONFIG } from 'src/configs/route'
+import { toFullName } from 'src/utils'
+import { Badge, Icon } from '@mui/material'
+import { styled } from '@mui/material'
 
 type TProps = {}
 
+const StyledBadge = styled(Badge)(({ theme }) => ({
+  '& .MuiBadge-badge': {
+    backgroundColor: '#44b700',
+    color: '#44b700',
+    boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+    '&::after': {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      borderRadius: '50%',
+      animation: 'ripple 1.2s infinite ease-in-out',
+      border: '1px solid currentColor',
+      content: '""'
+    }
+  },
+  '@keyframes ripple': {
+    '0%': {
+      transform: 'scale(.8)',
+      opacity: 1
+    },
+    '100%': {
+      transform: 'scale(2.4)',
+      opacity: 0
+    }
+  }
+}))
+
 const UserDropDown = (props: TProps) => {
   //*Translation
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
 
@@ -44,8 +76,13 @@ const UserDropDown = (props: TProps) => {
   }
 
   const handleNavigateMyProfile = () => {
-      router.push(`/${ROUTE_CONFIG.MY_PROFILE}`)
-      handleClose()
+    router.push(ROUTE_CONFIG.MY_PROFILE)
+    handleClose()
+  }
+
+  const handleNavigateChangePassword = () => {
+    router.push(ROUTE_CONFIG.CHANGE_PASSWORD)
+    handleClose()
   }
 
   return (
@@ -60,20 +97,24 @@ const UserDropDown = (props: TProps) => {
             aria-haspopup='true'
             aria-expanded={open ? 'true' : undefined}
           >
-            <Avatar sx={{ width: 32, height: 32 }}>
-              {user?.avatar ? (
-                <Image
-                  src={user?.avatar || ''}
-                  alt='avatar'
-                  style={{
-                    height: 'auto',
-                    width: 'auto'
-                  }}
-                />
-              ) : (
-                <IconifyIcon icon='ph:user-thin' />
-              )}
-            </Avatar>
+            <StyledBadge overlap='circular' anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} variant='dot'>
+              <Avatar sx={{ width: 32, height: 32 }}>
+                {user?.avatar ? (
+                  <Image
+                    src={user?.avatar || ''}
+                    alt='avatar'
+                    width={0}
+                    height={0}
+                    style={{
+                      height: '32px',
+                      width: '32px'
+                    }}
+                  />
+                ) : (
+                  <IconifyIcon icon='ph:user-thin' />
+                )}
+              </Avatar>
+            </StyledBadge>
           </IconButton>
         </Tooltip>
       </Box>
@@ -114,15 +155,51 @@ const UserDropDown = (props: TProps) => {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
-        <MenuItem onClick={handleClose}>
-          {user?.email} {user?.middleName} {user?.lastName}
-        </MenuItem>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mx: 2, pb: 4, px: 2 }}>
+          <StyledBadge overlap='circular' anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} variant='dot'>
+            <Avatar sx={{ width: 32, height: 32 }}>
+              {user?.avatar ? (
+                <Image
+                  src={user?.avatar || ''}
+                  alt='avatar'
+                  width={0}
+                  height={0}
+                  style={{
+                    height: '32px',
+                    width: '32px',
+                    objectFit: 'cover'
+                  }}
+                />
+              ) : (
+                <IconifyIcon icon='ph:user-thin' />
+              )}
+            </Avatar>
+          </StyledBadge>
+          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Typography component='span'>
+              {toFullName(user?.lastName || '', user?.middleName || '', user?.firstName || '', i18n.language)}
+            </Typography>
+            <Typography component='span'>{user?.role?.name}</Typography>
+          </Box>
+        </Box>
+        <Divider />
         <MenuItem onClick={handleNavigateMyProfile}>
-          <Avatar /> {t('My_profile')}
+          <Avatar>
+            <IconifyIcon icon='ph:user-thin' />
+          </Avatar>{' '}
+          {t('My_profile')}
+        </MenuItem>
+        <MenuItem onClick={handleNavigateChangePassword}>
+          <Avatar>
+            <IconifyIcon icon='arcticons:password' />
+          </Avatar>
+          {t('Change_password')}
         </MenuItem>
         <MenuItem onClick={logout}>
-          <ListItemIcon>{/* <Logout fontSize='small' /> */}</ListItemIcon>
-          Logout
+          <Avatar>
+            <IconifyIcon icon='material-symbols-light:logout' />
+          </Avatar>
+          {t('Logout')}
         </MenuItem>
       </Menu>
     </React.Fragment>
