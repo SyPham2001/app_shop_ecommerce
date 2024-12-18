@@ -9,6 +9,7 @@ import {
   Button,
   Card,
   CssBaseline,
+  FormHelperText,
   Grid,
   IconButton,
   InputAdornment,
@@ -43,10 +44,11 @@ import { t } from 'i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from 'src/stores'
 import toast from 'react-hot-toast'
-import { resetInitialState } from 'src/stores/apps/auth'
-import { updateAuthMeAsync } from 'src/stores/apps/auth/actions'
+import { resetInitialState } from 'src/stores/auth'
+import { updateAuthMeAsync } from 'src/stores/auth/actions'
 import FallbackSpinner from 'src/components/fall-back'
 import Spinner from 'src/components/spinner'
+import CustomSelect from 'src/components/custom-select'
 
 type TProps = {}
 
@@ -277,17 +279,42 @@ const MyProfilePage: NextPage<TProps> = () => {
                       required: true
                     }}
                     render={({ field: { onChange, onBlur, value } }) => (
-                      <CustomTextField
-                        required
-                        fullWidth
-                        disabled
-                        label={t('Role')}
-                        onChange={onChange}
-                        onBlur={onBlur}
-                        value={value}
-                        error={Boolean(errors?.role)}
-                        placeholder={t('Enter_your_role')}
-                      />
+                      <div>
+                        <label
+                          style={{
+                            fontSize: '13px',
+                            marginBottom: '4px',
+                            display: 'block',
+                            color: errors?.role
+                              ? theme.palette.error.main
+                              : `rgba(${theme.palette.customColors.main}, 0.42)`
+                          }}
+                        >
+                          {' '}
+                          {t('Role')} <span style={{ color: theme.palette.error.main }}>*</span>
+                        </label>
+                        <CustomSelect
+                          fullWidth
+                          disabled
+                          onChange={onChange}
+                          options={optionRoles}
+                          error={Boolean(errors?.role)}
+                          onBlur={onBlur}
+                          value={value}
+                          placeholder={t('Enter_your_role')}
+                        />
+                        {errors?.role?.message && (
+                          <FormHelperText
+                            sx={{
+                              color: errors?.role
+                                ? theme.palette.error.main
+                                : `rgba(${theme.palette.customColors.main}, 0.42)`
+                            }}
+                          >
+                            {errors?.role?.message}
+                          </FormHelperText>
+                        )}
+                      </div>
                     )}
                     name='role'
                   />
