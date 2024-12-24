@@ -49,6 +49,8 @@ import { updateAuthMeAsync } from 'src/stores/auth/actions'
 import FallbackSpinner from 'src/components/fall-back'
 import Spinner from 'src/components/spinner'
 import CustomSelect from 'src/components/custom-select'
+import { getAllRoles } from 'src/services/role'
+import { InputLabel } from '@mui/material'
 
 type TProps = {}
 
@@ -67,8 +69,9 @@ const MyProfilePage: NextPage<TProps> = () => {
   const [avatar, setAvatar] = useState('')
   const [optionRoles, setOptionRoles] = useState<{ label: string; value: string }[]>([])
   const [isDisabledRole, setIsDisabledRole] = useState(false)
-  const [roleId, setRoleId] = useState('')
+
   const [optionCities, setOptionCities] = useState<{ label: string; value: string }[]>([])
+
   const { user } = useAuth()
 
   //theme
@@ -122,19 +125,35 @@ const MyProfilePage: NextPage<TProps> = () => {
         const data = response?.data
         if (data) {
           // setIsDisabledRole(!data?.role?.permissions?.length)
-          setRoleId(data?.role._id)
+          // setRoleId(data?.role._id)
           reset({
             email: data?.email,
             address: data?.address,
             city: data?.city,
             phoneNumber: data?.phoneNumber,
-            role: data?.role?.name,
+            role: data?.role?._id,
             fullName: toFullName(data?.lastName, data?.middleName, data?.firstName, i18n.language)
           })
           setAvatar(data?.avatar)
         }
       })
       .catch(() => {
+        setLoading(false)
+      })
+  }
+
+  //fetch all roles
+  const fetchAllRoles = async () => {
+    setLoading(true)
+    await getAllRoles({ params: { limit: -1, page: -1 } })
+      .then(res => {
+        const data = res?.data.roles
+        if (data) {
+          setOptionRoles(data?.map((item: { name: string; _id: string }) => ({ label: item.name, value: item._id })))
+        }
+        setLoading(false)
+      })
+      .catch(e => {
         setLoading(false)
       })
   }
@@ -155,6 +174,10 @@ const MyProfilePage: NextPage<TProps> = () => {
     }
   }, [isErrorUpdateMe, isSuccessUpdateMe, messageUpdateMe])
 
+  useEffect(() => {
+    fetchAllRoles()
+  }, [])
+
   const onSubmit = (data: any) => {
     const { firstName, lastName, middleName } = separationFullName(data.fullName, i18n.language)
     dispatch(
@@ -163,7 +186,7 @@ const MyProfilePage: NextPage<TProps> = () => {
         firstName: firstName,
         lastName: lastName,
         middleName: middleName,
-        role: roleId,
+        role: data.role,
         phoneNumber: data.phoneNumber,
         avatar,
         address: data.address
@@ -374,18 +397,44 @@ const MyProfilePage: NextPage<TProps> = () => {
                 </Grid>
                 <Grid item md={6} xs={12}>
                   <Controller
+                    name='city'
                     control={control}
                     render={({ field: { onChange, onBlur, value } }) => (
-                      <CustomTextField
-                        fullWidth
-                        onChange={onChange}
-                        label={t('City')}
-                        onBlur={onBlur}
-                        value={value}
-                        placeholder={t('Enter_your_city')}
-                      />
+                      <Box>
+                        <InputLabel
+                          sx={{
+                            fontSize: '13px',
+                            marginBottom: '4px',
+                            display: 'block',
+                            color: errors?.city
+                              ? theme.palette.error.main
+                              : `rgba(${theme.palette.customColors.main}, 0.42)`
+                          }}
+                        >
+                          {t('City')}
+                        </InputLabel>
+                        <CustomSelect
+                          fullWidth
+                          onChange={onChange}
+                          options={optionCities}
+                          error={Boolean(errors?.city)}
+                          onBlur={onBlur}
+                          value={value}
+                          placeholder={t('Enter_your_city')}
+                        />
+                        {errors?.city?.message && (
+                          <FormHelperText
+                            sx={{
+                              color: errors?.city
+                                ? theme.palette.error.main
+                                : `rgba(${theme.palette.customColors.main}, 0.42)`
+                            }}
+                          >
+                            {errors?.city?.message}
+                          </FormHelperText>
+                        )}
+                      </Box>
                     )}
-                    name='city'
                   />
                 </Grid>
                 <Grid item md={6} xs={12}>
