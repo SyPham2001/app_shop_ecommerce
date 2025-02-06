@@ -10,5 +10,7 @@ declare module 'next' {
     setConfig?: () => void
     contentHeightFixed?: boolean
     getLayout?: (page: ReactElement) => ReactNode
+    permission?:string[]
+
   }
 }

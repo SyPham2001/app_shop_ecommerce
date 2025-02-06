@@ -1,8 +1,6 @@
 {
   "Account": "Tài khoản",
   "My_profile": "Hồ sơ của tôi",
-  "Profile": "Hồ sơ của tôi",
-  "Sign-in" : "Đăng nhập",
   "Enter_your_email": "Nhập email của bạn",
   "Role": "Nhóm vai trò",
   "Enter_your_role": "Chọn vai trò của bạn",
@@ -222,7 +220,7 @@
   "Add_to_cart": "Thêm giỏ hàng",
   "not_review": "Chưa đánh giá",
   "Sold_product": "Đã bán",
-  "Product": "sản phẩm",
+  "Product": "Sản phẩm",
   "Still": "Còn",
   "product_in_stock": "sản phẩm trong kho",
   "Description_product": "Mô tả sản phẩm",

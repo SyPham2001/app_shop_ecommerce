@@ -235,7 +235,7 @@ const ListVerticalLayout: NextPage<TProps> = ({ open }) => {
     return null
   }
 
-  const hasPermission = (item: any, permissionUser: string[]) => {
+  const hasPermission = (item: any, permissionUser: string[]) => { 
     return permissionUser.includes(item.permission) || !item.permission
   }
 
