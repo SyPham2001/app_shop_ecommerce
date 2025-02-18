@@ -1,28 +1,38 @@
-//**React */
-import React from 'react'
-//** Next page */
-import Image from 'next/image'
+// ** React
+import React, { useEffect } from 'react'
 
-//** Mui Import */
+// ** Next
+import Image from 'next/image'
+import { useRouter } from 'next/router'
+
+// ** Mui Imports
 import Box from '@mui/material/Box'
 import Avatar from '@mui/material/Avatar'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
-import ListItemIcon from '@mui/material/ListItemIcon'
 import Divider from '@mui/material/Divider'
 import IconButton from '@mui/material/IconButton'
-import Typography from '@mui/material/Typography'
 import Tooltip from '@mui/material/Tooltip'
-import IconifyIcon from 'src/components/Icon'
+import { Badge, Typography, styled } from '@mui/material'
 
-//**Hooks */
+// ** Components
+import Icon from 'src/components/Icon'
+
+// ** Hooks
 import { useAuth } from 'src/hooks/useAuth'
+
+// ** Translate
 import { useTranslation } from 'react-i18next'
-import { useRouter } from 'next/router'
+
+// ** config
 import { ROUTE_CONFIG } from 'src/configs/route'
+
+// ** Utils
 import { toFullName } from 'src/utils'
-import { Badge, Icon } from '@mui/material'
-import { styled } from '@mui/material'
+
+// ** Redux
+import { useSelector } from 'react-redux'
+import { RootState } from 'src/stores'
 
 type TProps = {}
 
@@ -55,14 +65,16 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
   }
 }))
 
-const UserDropDown = (props: TProps) => {
-  //*Translation
+const UserDropdown = (props: TProps) => {
+  // ** Translation
   const { t, i18n } = useTranslation()
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
 
   const { user, logout, setUser } = useAuth()
 
+  // ** Redux
+  const { userData } = useSelector((state: RootState) => state.auth)
   const permissionUser = user?.role?.permissions ?? []
 
   const open = Boolean(anchorEl)
@@ -91,6 +103,23 @@ const UserDropDown = (props: TProps) => {
     router.push(ROUTE_CONFIG.DASHBOARD)
     handleClose()
   }
+
+  const handleNavigateMyProduct = () => {
+    router.push(ROUTE_CONFIG.MY_PRODUCT)
+    handleClose()
+  }
+
+  const handleNavigateMyOrder = () => {
+    router.push(ROUTE_CONFIG.MY_ORDER)
+    handleClose()
+  }
+
+  useEffect(() => {
+    if (userData) {
+      setUser({ ...userData })
+    }
+  }, [userData])
+
   return (
     <React.Fragment>
       <Box sx={{ display: 'flex', alignItems: 'center', textAlign: 'center' }}>
@@ -113,11 +142,12 @@ const UserDropDown = (props: TProps) => {
                     height={0}
                     style={{
                       height: '32px',
-                      width: '32px'
+                      width: '32px',
+                      objectFit: 'cover'
                     }}
                   />
                 ) : (
-                  <IconifyIcon icon='ph:user-thin' />
+                  <Icon icon='ph:user-thin' />
                 )}
               </Avatar>
             </StyledBadge>
@@ -130,38 +160,36 @@ const UserDropDown = (props: TProps) => {
         open={open}
         onClose={handleClose}
         onClick={handleClose}
-        slotProps={{
-          paper: {
-            elevation: 0,
-            sx: {
-              overflow: 'visible',
-              filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-              mt: 1.5,
-              '& .MuiAvatar-root': {
-                width: 32,
-                height: 32,
-                ml: -0.5,
-                mr: 1
-              },
-              '&::before': {
-                content: '""',
-                display: 'block',
-                position: 'absolute',
-                top: 0,
-                right: 14,
-                width: 10,
-                height: 10,
-                bgcolor: 'background.paper',
-                transform: 'translateY(-50%) rotate(45deg)',
-                zIndex: 0
-              }
+        PaperProps={{
+          elevation: 0,
+          sx: {
+            overflow: 'visible',
+            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+            mt: 1.5,
+            '& .MuiAvatar-root': {
+              width: 32,
+              height: 32,
+              ml: -0.5,
+              mr: 1
+            },
+            '&::before': {
+              content: '""',
+              display: 'block',
+              position: 'absolute',
+              top: 0,
+              right: 14,
+              width: 10,
+              height: 10,
+              bgcolor: 'background.paper',
+              transform: 'translateY(-50%) rotate(45deg)',
+              zIndex: 0
             }
           }
         }}
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mx: 2, pb: 4, px: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mx: 2, pb: 2, px: 2 }}>
           <StyledBadge overlap='circular' anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} variant='dot'>
             <Avatar sx={{ width: 32, height: 32 }}>
               {user?.avatar ? (
@@ -177,7 +205,7 @@ const UserDropDown = (props: TProps) => {
                   }}
                 />
               ) : (
-                <IconifyIcon icon='ph:user-thin' />
+                <Icon icon='ph:user-thin' />
               )}
             </Avatar>
           </StyledBadge>
@@ -192,27 +220,38 @@ const UserDropDown = (props: TProps) => {
         {permissionUser.length > 0 && (
           <MenuItem onClick={handleNavigateManageSystem}>
             <Avatar>
-              <IconifyIcon icon='arcticons:phone-manager' />
+              <Icon icon='arcticons:phone-manager' />
             </Avatar>{' '}
             {t('Manage_system')}
           </MenuItem>
         )}
-
         <MenuItem onClick={handleNavigateMyProfile}>
           <Avatar>
-            <IconifyIcon icon='ph:user-thin' />
+            <Icon icon='ph:user-thin' />
           </Avatar>{' '}
           {t('My_profile')}
         </MenuItem>
+        <MenuItem onClick={handleNavigateMyProduct}>
+          <Avatar>
+            <Icon icon='tabler:brand-producthunt'/>
+          </Avatar>{' '}
+          {t('My_product')}
+        </MenuItem>
+        <MenuItem onClick={handleNavigateMyOrder}>
+          <Avatar>
+            <Icon icon='material-symbols-light:order-approve-outline-rounded' />
+          </Avatar>{' '}
+          {t('My_order')}
+        </MenuItem>
         <MenuItem onClick={handleNavigateChangePassword}>
           <Avatar>
-            <IconifyIcon icon='arcticons:password' />
+            <Icon icon='arcticons:password'/>
           </Avatar>
           {t('Change_password')}
         </MenuItem>
         <MenuItem onClick={logout}>
-          <Avatar>
-            <IconifyIcon icon='material-symbols-light:logout' />
+          <Avatar >
+            <Icon icon='material-symbols-light:logout' />
           </Avatar>
           {t('Logout')}
         </MenuItem>
@@ -221,4 +260,4 @@ const UserDropDown = (props: TProps) => {
   )
 }
 
-export default UserDropDown
+export default UserDropdown

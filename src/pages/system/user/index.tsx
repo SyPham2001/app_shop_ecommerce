@@ -1,18 +1,16 @@
-// react
+// ** Import Next
 import { NextPage } from 'next'
-import { ReactNode } from 'react'
+
+//** Config */
 import { PERMISSIONS } from 'src/configs/permission'
-import BlankLayout from 'src/views/layouts/BlankLayout'
-import LayoutNotApp from 'src/views/layouts/LayoutNotApp'
 
-import RegisterPage from 'src/views/pages/register'
-
-// view
+//** Page */
+import UserListPage from 'src/views/pages/system/user/UserList'
 
 type TProps = {}
 
 const User: NextPage<TProps> = () => {
-  return <h1>User</h1>
+  return <UserListPage />
 }
 User.permission = [PERMISSIONS.SYSTEM.USER.VIEW]
 
