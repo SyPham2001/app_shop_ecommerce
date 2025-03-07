@@ -35,12 +35,12 @@ import { usePermission } from 'src/hooks/usePermission'
 
 // ** Config
 import { PAGE_SIZE_OPTION } from 'src/configs/gridConfig'
-import { deleteRole, getAllRoles } from 'src/services/role'
-
 import { useRouter } from 'next/router'
 import IconifyIcon from 'src/components/Icon'
 import { OBJECT_TYPE_ERROR_ROLE } from 'src/configs/role'
 import CreateEditUser from './components/CreateEditUser'
+import TableHeader from 'src/components/table-header'
+import { PERMISSIONS } from 'src/configs/permission'
 
 type TProps = {}
 type TSelectedRow = { id: string; role: { name: string; permissions: string[] } }
@@ -93,6 +93,8 @@ const UserListPage: NextPage<TProps> = () => {
   const [searchBy, setSearchBy] = useState('')
   const [loading, setLoading] = useState(false)
   const [filterBy, setFilterBy] = useState<Record<string, string | string[]>>({})
+  const [selectedRow, setSelectedRow] = useState<TSelectedRow[]>([])
+  const [openDeleteMultipleUser, setOpenDeleteMultipleUser] = useState(false)
 
   //PERMISSIONS
   const { VIEW, CREATE, UPDATE, DELETE } = usePermission('SYSTEM.USER', ['CREATE', 'VIEW', 'UPDATE', 'DELETE'])
@@ -134,6 +136,9 @@ const UserListPage: NextPage<TProps> = () => {
       id: ''
     })
   }
+  const handleCloseConfirmDeleteMultipleUser = useCallback(() => {
+    setOpenDeleteMultipleUser(false)
+  }, [])
 
   const handleSort = (sort: GridSortModel) => {
     // const sortField = sort[0]
@@ -154,6 +159,29 @@ const UserListPage: NextPage<TProps> = () => {
     setPage(page)
     setPageSize(pageSize)
   }
+
+  const handleDeleteMultipleUser = useCallback(() => {
+    dispatch(
+      deleteMultipleUserAsync({
+        userIds: selectedRow?.map((item: TSelectedRow) => item.id)
+      })
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRow])
+
+  const handleAction = useCallback((action: string) => {
+    switch (action) {
+      case 'delete': {
+        setOpenDeleteMultipleUser(true)
+        break
+      }
+    }
+  }, [])
+
+  const memoDisabledDeleteUser = useMemo(() => {
+    return selectedRow.some((item: TSelectedRow) => item?.role?.permissions?.includes(PERMISSIONS.ADMIN))
+  }, [selectedRow])
+
   const PaginationComponent = () => {
     return (
       <CustomPagination
@@ -348,6 +376,14 @@ const UserListPage: NextPage<TProps> = () => {
         title={t('Title_delete_user')}
         description={t('Confirm_delete_user')}
       />
+      <ConfirmationDialog
+        open={openDeleteMultipleUser}
+        handleClose={handleCloseConfirmDeleteMultipleUser}
+        handleCancel={handleCloseConfirmDeleteMultipleUser}
+        handleConfirm={handleDeleteMultipleUser}
+        title={t('Title_delete_multiple_user')}
+        description={t('Confirm_delete_multiple_user')}
+      />
       <CreateEditUser open={openCreateEdit.open} onClose={handleCloseCreateEdit} idUser={openCreateEdit.id} />
       {isLoading && <Spinner />}
       <Box
@@ -362,20 +398,32 @@ const UserListPage: NextPage<TProps> = () => {
         }}
       >
         <Grid sx={{ height: '100%', width: '100%' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4, mb: 4, width: '100%' }}>
-            <Box sx={{ width: '200px' }}>
-              <InputSearch value={searchBy} onChange={(value: string) => setSearchBy(value)} />
+          {!selectedRow?.length && (
+            <Box
+              sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4, mb: 4, width: '100%' }}
+            >
+              <Box sx={{ width: '200px' }}>
+                <InputSearch value={searchBy} onChange={(value: string) => setSearchBy(value)} />
+              </Box>
+              <GridCreate
+                disabled={!CREATE}
+                onClick={() => {
+                  setOpenCreateEdit({
+                    open: true,
+                    id: ''
+                  })
+                }}
+              />
             </Box>
-            <GridCreate
-              disabled={!CREATE}
-              onClick={() => {
-                setOpenCreateEdit({
-                  open: true,
-                  id: ''
-                })
-              }}
+          )}
+          {selectedRow?.length > 0 && (
+            <TableHeader
+              numRow={selectedRow?.length}
+              onClear={() => setSelectedRow([])}
+              handleAction={handleAction}
+              actions={[{ label: t('Xóa'), value: 'delete', disabled: memoDisabledDeleteUser || !DELETE }]}
             />
-          </Box>
+          )}
           <CustomDataGrid
             autoHeight
             // hideFooter
@@ -404,6 +452,16 @@ const UserListPage: NextPage<TProps> = () => {
             //     id: String(row.id)
             //   })
             // }}
+            rowSelectionModel={selectedRow?.map(item => item.id)}
+            onRowSelectionModelChange={(row: GridRowSelectionModel) => {
+              const formatData: any = row.map(id => {
+                const findRow: any = users?.data?.find((item: any) => item._id === id)
+                if (findRow) {
+                  return { id: findRow?._id, role: findRow?.role }
+                }
+              })
+              setSelectedRow(formatData)
+            }}
             disableColumnFilter
           />
         </Grid>
