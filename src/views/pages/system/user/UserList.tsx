@@ -41,6 +41,8 @@ import { OBJECT_TYPE_ERROR_ROLE } from 'src/configs/role'
 import CreateEditUser from './components/CreateEditUser'
 import TableHeader from 'src/components/table-header'
 import { PERMISSIONS } from 'src/configs/permission'
+import { getAllRoles } from 'src/services/role'
+import CustomSelect from 'src/components/custom-select'
 
 type TProps = {}
 type TSelectedRow = { id: string; role: { name: string; permissions: string[] } }
@@ -95,6 +97,8 @@ const UserListPage: NextPage<TProps> = () => {
   const [filterBy, setFilterBy] = useState<Record<string, string | string[]>>({})
   const [selectedRow, setSelectedRow] = useState<TSelectedRow[]>([])
   const [openDeleteMultipleUser, setOpenDeleteMultipleUser] = useState(false)
+  const [optionRoles, setOptionRoles] = useState<{ label: string; value: string }[]>([])
+  const [roleSelected, setRoleSelected] = useState<string[]>([])
 
   //PERMISSIONS
   const { VIEW, CREATE, UPDATE, DELETE } = usePermission('SYSTEM.USER', ['CREATE', 'VIEW', 'UPDATE', 'DELETE'])
@@ -110,7 +114,10 @@ const UserListPage: NextPage<TProps> = () => {
     isErrorDelete,
     isSuccessDelete,
     messageErrorDelete,
-    typeError
+    typeError,
+    isSuccessMultipleDelete,
+    isErrorMultipleDelete,
+    messageErrorMultipleDelete
   } = useSelector((state: RootState) => state.user)
 
   const { i18n } = useTranslation()
@@ -143,7 +150,11 @@ const UserListPage: NextPage<TProps> = () => {
   const handleSort = (sort: GridSortModel) => {
     // const sortField = sort[0]
     const sortOption = sort[0]
-    setSortBy(`${sortOption.field} ${sortOption.sort}`)
+    if (sortOption) {
+      setSortBy(`${sortOption.field} ${sortOption.sort}`)
+    } else {
+      setSortBy('createdAt desc')
+    }
   }
   const handleCloseCreateEdit = () => {
     setOpenCreateEdit({
@@ -322,10 +333,38 @@ const UserListPage: NextPage<TProps> = () => {
   ]
 
   //fetch api
+  const fetchAllRoles = async () => {
+    setLoading(true)
+    await getAllRoles({ params: { limit: -1, page: -1 } })
+      .then(res => {
+        const data = res?.data.roles
+        if (data) {
+          setOptionRoles(data?.map((item: { name: string; _id: string }) => ({ label: item.name, value: item._id })))
+        }
+        setLoading(false)
+      })
+      .catch(e => {
+        setLoading(false)
+      })
+  }
+
+  useEffect(() => {
+    fetchAllRoles()
+  }, [])
 
   useEffect(() => {
     handleGetListUsers()
-  }, [sortBy, searchBy])
+  }, [sortBy, searchBy, i18n.language, page, pageSize, filterBy])
+
+  useEffect(() => {
+    setFilterBy({ roleId: roleSelected })
+  }, [roleSelected])
+  // useEffect(() => {
+  //   if (isFirstRender.current) {
+  //     handleGetListUsers()
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [sortBy, searchBy, i18n.language, page, pageSize, filterBy])
 
   useEffect(() => {
     if (isSuccessCreateEdit) {
@@ -365,6 +404,20 @@ const UserListPage: NextPage<TProps> = () => {
     }
   }, [isSuccessDelete, isErrorDelete, messageErrorDelete])
 
+  useEffect(() => {
+    if (isSuccessMultipleDelete) {
+      toast.success(t('Delete_multiple_user_success'))
+      handleGetListUsers()
+      dispatch(resetInitialState())
+      handleCloseConfirmDeleteMultipleUser()
+      setSelectedRow([])
+    } else if (isErrorMultipleDelete && messageErrorMultipleDelete) {
+      toast.error(t('Delete_multiple_user_error'))
+      dispatch(resetInitialState())
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSuccessMultipleDelete, isErrorMultipleDelete, messageErrorMultipleDelete])
+
   return (
     <>
       {loading && <Spinner />}
@@ -397,11 +450,23 @@ const UserListPage: NextPage<TProps> = () => {
           borderRadius: '15px'
         }}
       >
-        <Grid sx={{ height: '100%', width: '100%' }}>
+        <Grid container sx={{ height: '100%', width: '100%' }}>
           {!selectedRow?.length && (
             <Box
               sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4, mb: 4, width: '100%' }}
             >
+              <Box sx={{ width: '200px' }}>
+                <CustomSelect
+                  fullWidth
+                  onChange={e => {
+                    setRoleSelected(e.target.value as string[])
+                  }}
+                  multiple
+                  options={optionRoles}
+                  value={roleSelected}
+                  placeholder={t('Role')}
+                />
+              </Box>
               <Box sx={{ width: '200px' }}>
                 <InputSearch value={searchBy} onChange={(value: string) => setSearchBy(value)} />
               </Box>
