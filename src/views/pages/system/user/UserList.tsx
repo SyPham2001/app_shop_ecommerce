@@ -43,6 +43,7 @@ import TableHeader from 'src/components/table-header'
 import { PERMISSIONS } from 'src/configs/permission'
 import { getAllRoles } from 'src/services/role'
 import CustomSelect from 'src/components/custom-select'
+import { OBJECT_STATUS_USER } from 'src/configs/user'
 
 type TProps = {}
 type TSelectedRow = { id: string; role: { name: string; permissions: string[] } }
@@ -99,6 +100,9 @@ const UserListPage: NextPage<TProps> = () => {
   const [openDeleteMultipleUser, setOpenDeleteMultipleUser] = useState(false)
   const [optionRoles, setOptionRoles] = useState<{ label: string; value: string }[]>([])
   const [roleSelected, setRoleSelected] = useState<string[]>([])
+  const [statusSelected, setStatusSelected] = useState<string[]>([])
+
+  const CONSTANT_STATUS_USER = OBJECT_STATUS_USER()
 
   //PERMISSIONS
   const { VIEW, CREATE, UPDATE, DELETE } = usePermission('SYSTEM.USER', ['CREATE', 'VIEW', 'UPDATE', 'DELETE'])
@@ -357,8 +361,9 @@ const UserListPage: NextPage<TProps> = () => {
   }, [sortBy, searchBy, i18n.language, page, pageSize, filterBy])
 
   useEffect(() => {
-    setFilterBy({ roleId: roleSelected })
-  }, [roleSelected])
+    setFilterBy({ roleId: roleSelected, status: statusSelected })
+  }, [roleSelected, statusSelected])
+
   // useEffect(() => {
   //   if (isFirstRender.current) {
   //     handleGetListUsers()
@@ -465,6 +470,18 @@ const UserListPage: NextPage<TProps> = () => {
                   options={optionRoles}
                   value={roleSelected}
                   placeholder={t('Role')}
+                />
+              </Box>
+              <Box sx={{ width: '200px' }}>
+                <CustomSelect
+                  fullWidth
+                  onChange={e => {
+                    setStatusSelected(e.target.value as string[])
+                  }}
+                  multiple
+                  options={Object.values(CONSTANT_STATUS_USER)}
+                  value={statusSelected}
+                  placeholder={t('Status')}
                 />
               </Box>
               <Box sx={{ width: '200px' }}>
