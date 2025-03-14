@@ -1,19 +1,17 @@
-// react
+// ** Import Next
 import { NextPage } from 'next'
-import { ReactNode } from 'react'
-import BlankLayout from 'src/views/layouts/BlankLayout'
-import LayoutNotApp from 'src/views/layouts/LayoutNotApp'
 
-import RegisterPage from 'src/views/pages/register'
+// ** Config
+import { PERMISSIONS } from 'src/configs/permission'
 
-// view
+// ** Pages
+import CityListPage from 'src/views/pages/settings/city/CityList'
 
 type TProps = {}
 
-const City: NextPage<TProps> = () => {
-  return <h1>City</h1>
+const Index: NextPage<TProps> = () => {
+  return <CityListPage />
 }
 
-export default City 
-
-// ManageSystem.guestGuard = true
+// Index.permission = [PERMISSIONS.SETTING.CITY.VIEW]
+export default Index
