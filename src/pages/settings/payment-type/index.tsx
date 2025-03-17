@@ -5,15 +5,16 @@ import BlankLayout from 'src/views/layouts/BlankLayout'
 import LayoutNotApp from 'src/views/layouts/LayoutNotApp'
 
 import RegisterPage from 'src/views/pages/register'
+import PaymentTypeListPage from 'src/views/pages/settings/payment-type/PaymentTypeList'
 
 // view
 
 type TProps = {}
 
-const PaymentType: NextPage<TProps> = () => {
-  return <h1>PaymentType</h1>
+const Index: NextPage<TProps> = () => {
+  return <PaymentTypeListPage />
 }
 
-export default PaymentType
+export default Index
 
 // ManageSystem.guestGuard = true

@@ -5,15 +5,16 @@ import BlankLayout from 'src/views/layouts/BlankLayout'
 import LayoutNotApp from 'src/views/layouts/LayoutNotApp'
 
 import RegisterPage from 'src/views/pages/register'
+import DeliveryTypeListPage from 'src/views/pages/settings/delivery-type/DeliveryTypeList'
 
 // view
 
 type TProps = {}
 
-const DeliveryType: NextPage<TProps> = () => {
-  return <h1>DeliveryType</h1>
+const Index: NextPage<TProps> = () => {
+  return <DeliveryTypeListPage />
 }
 
-export default DeliveryType 
+export default Index
 
 // ManageSystem.guestGuard = true
