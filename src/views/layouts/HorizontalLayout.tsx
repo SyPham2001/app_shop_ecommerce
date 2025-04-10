@@ -20,6 +20,8 @@ import LanguageDropDown from './components/language-dropdown'
 import { useAuth } from 'src/hooks/useAuth'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
+import Link from 'next/link'
+import { ROUTE_CONFIG } from 'src/configs/route'
 
 const drawerWidth: number = 240
 
@@ -55,7 +57,6 @@ const AppBar = styled(MuiAppBar, {
 }))
 
 const HorizontalLayout: NextPage<TProps> = ({ open, toggleDrawer, isHideMenu }) => {
-  
   const { user } = useAuth()
 
   const router = useRouter()
@@ -97,8 +98,16 @@ const HorizontalLayout: NextPage<TProps> = ({ open, toggleDrawer, isHideMenu }) 
           </IconButton>
         )}
 
-        <Typography component='h1' variant='h6' color='inherit' noWrap sx={{ flexGrow: 1 }}>
-          Dashboard
+<Typography
+          component='h1'
+          variant='h6'
+          color='primary'
+          noWrap
+          sx={{ flexGrow: 1, fontWeight: '600', cursor: 'pointer' }}
+        >
+          <Link style={{ color: 'inherit' }} href={ROUTE_CONFIG.HOME}>
+            {t('Home Page')}
+          </Link>
         </Typography>
         <LanguageDropDown />
         <ModeToggle />
@@ -106,7 +115,7 @@ const HorizontalLayout: NextPage<TProps> = ({ open, toggleDrawer, isHideMenu }) 
           <UserDropDown />
         ) : (
           <Button variant='contained' sx={{ ml: 2, width: 'auto' }} onClick={handleNavigateLogin}>
-            Sign In 
+            Sign In
           </Button>
         )}
       </Toolbar>

@@ -44,6 +44,7 @@ import { PERMISSIONS } from 'src/configs/permission'
 import { getAllRoles } from 'src/services/role'
 import CustomSelect from 'src/components/custom-select'
 import { OBJECT_STATUS_USER } from 'src/configs/user'
+import { getAllCities } from 'src/services/city'
 
 type TProps = {}
 type TSelectedRow = { id: string; role: { name: string; permissions: string[] } }
@@ -101,6 +102,8 @@ const UserListPage: NextPage<TProps> = () => {
   const [optionRoles, setOptionRoles] = useState<{ label: string; value: string }[]>([])
   const [roleSelected, setRoleSelected] = useState<string[]>([])
   const [statusSelected, setStatusSelected] = useState<string[]>([])
+  const [optionCities, setOptionCities] = useState<{ label: string; value: string }[]>([])
+  const [citySelected, setCitySelected] = useState<string[]>([])
 
   const CONSTANT_STATUS_USER = OBJECT_STATUS_USER()
 
@@ -351,9 +354,25 @@ const UserListPage: NextPage<TProps> = () => {
         setLoading(false)
       })
   }
+  const fetchAllCities = async () => {
+    setLoading(true)
+    await getAllCities({ params: { limit: -1, page: -1 } })
+      .then(res => {
+        const data = res?.data.cities
+        if (data) {
+          setOptionCities(data?.map((item: { name: string; _id: string }) => ({ label: item.name, value: item._id })))
+        }
+        setLoading(false)
+      })
+
+      .catch(e => {
+        setLoading(false)
+      })
+  }
 
   useEffect(() => {
     fetchAllRoles()
+    fetchAllCities()
   }, [])
 
   useEffect(() => {
@@ -361,8 +380,8 @@ const UserListPage: NextPage<TProps> = () => {
   }, [sortBy, searchBy, i18n.language, page, pageSize, filterBy])
 
   useEffect(() => {
-    setFilterBy({ roleId: roleSelected, status: statusSelected })
-  }, [roleSelected, statusSelected])
+    setFilterBy({ roleId: roleSelected, status: statusSelected, cityId: citySelected })
+  }, [roleSelected, statusSelected, citySelected])
 
   // useEffect(() => {
   //   if (isFirstRender.current) {
@@ -470,6 +489,18 @@ const UserListPage: NextPage<TProps> = () => {
                   options={optionRoles}
                   value={roleSelected}
                   placeholder={t('Role')}
+                />
+              </Box>
+              <Box sx={{ width: '200px' }}>
+                <CustomSelect
+                  fullWidth
+                  onChange={e => {
+                    setCitySelected(e.target.value as string[])
+                  }}
+                  multiple
+                  options={optionCities}
+                  value={citySelected}
+                  placeholder={t('City')}
                 />
               </Box>
               <Box sx={{ width: '200px' }}>

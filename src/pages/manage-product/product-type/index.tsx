@@ -1,19 +1,17 @@
-// react
+// ** Import Next
 import { NextPage } from 'next'
-import { ReactNode } from 'react'
-import BlankLayout from 'src/views/layouts/BlankLayout'
-import LayoutNotApp from 'src/views/layouts/LayoutNotApp'
 
-import RegisterPage from 'src/views/pages/register'
+// ** Pages
+import ProductTypeListPage from 'src/views/pages/manage-product/product-type/ProductTypeList'
 
-// view
+// ** Config
+import { PERMISSIONS } from 'src/configs/permission'
 
 type TProps = {}
 
-const ProductType: NextPage<TProps> = () => {
-  return <h1>ProductType</h1>
+const Index: NextPage<TProps> = () => {
+  return <ProductTypeListPage />
 }
 
-export default ProductType
-
-// ManageSystem.guestGuard = true
+// Index.permission = [PERMISSIONS.MANAGE_PRODUCT.PRODUCT_TYPE.VIEW]
+export default Index
