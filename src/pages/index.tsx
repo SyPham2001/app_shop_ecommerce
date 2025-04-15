@@ -7,6 +7,8 @@ import CustomTextField from 'src/components/text-field'
 import { useSettings } from 'src/hooks/useSettings'
 import LayoutNotApp from 'src/views/layouts/LayoutNotApp'
 
+import HomePage from 'src/views/pages/home'
+
 export default function Home() {
   const theme = useTheme()
   const { settings } = useSettings()
@@ -18,6 +20,7 @@ export default function Home() {
         <meta name='viewport' content='width=device-width, initial-scale=1' />
         <link rel='icon' href='/favicon.ico' />
       </Head>
+      {/* <HomePage /> */}
     </>
   )
 }
