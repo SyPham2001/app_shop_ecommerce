@@ -1,56 +1,51 @@
-// ** import Next
-import Image from 'next/image'
+// ** Next
 import { NextPage } from 'next'
 
-//Mui
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CssBaseline,
-  FormHelperText,
-  Grid,
-  IconButton,
-  InputAdornment,
-  Link,
-  Typography,
-  useTheme
-} from '@mui/material'
+// ** React
+import { useEffect, useState } from 'react'
+import React from 'react'
 
-// form
+// ** Mui
+import { Avatar, Box, Button, FormHelperText, Grid, IconButton, InputLabel, useTheme } from '@mui/material'
+
+// ** Components
+import CustomTextField from 'src/components/text-field'
+import Icon from 'src/components/Icon'
+import WrapperFileUpload from 'src/components/wrapper-file-upload'
+
+// ** form
 import { Controller, useForm } from 'react-hook-form'
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
 
-// components
-import Icon from 'src/components/Icon'
-import CustomTextField from 'src/components/text-field'
+// ** Config
+import { EMAIL_REG } from 'src/configs/regex'
 
-// config
-import { EMAIL_REG, PASSWORD_REG } from 'src/configs/regex'
-import { useEffect, useState } from 'react'
-
-// Image
-import RegisterDark from '../../../../public/images/register-dark.png'
-import RegisterLight from '../../../../public/images/register-light.png'
-import IconifyIcon from 'src/components/Icon'
-import { useTranslation } from 'react-i18next'
-import WrapperFileUpload from 'src/components/wrapper-file-upload'
-import { useAuth } from 'src/hooks/useAuth'
-import { getAuthMe } from 'src/services/auth'
-import { convertBase64, separationFullName, toFullName } from 'src/utils'
+// ** Translate
 import { t } from 'i18next'
+import { useTranslation } from 'react-i18next'
+
+// ** services
+import { getAuthMe } from 'src/services/auth'
+import { getAllRoles } from 'src/services/role'
+import { getAllCities } from 'src/services/city'
+
+// ** Utils
+import { convertBase64, separationFullName, toFullName } from 'src/utils'
+
+// ** Redux
+import { updateAuthMeAsync } from 'src/stores/auth/actions'
+import { resetInitialState } from 'src/stores/auth'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from 'src/stores'
-import toast from 'react-hot-toast'
-import { resetInitialState } from 'src/stores/auth'
-import { updateAuthMeAsync } from 'src/stores/auth/actions'
+
+// ** component
 import FallbackSpinner from 'src/components/fall-back'
+
+// ** Other
+import toast from 'react-hot-toast'
 import Spinner from 'src/components/spinner'
 import CustomSelect from 'src/components/custom-select'
-import { getAllRoles } from 'src/services/role'
-import { InputLabel } from '@mui/material'
 
 type TProps = {}
 
@@ -69,25 +64,22 @@ const MyProfilePage: NextPage<TProps> = () => {
   const [avatar, setAvatar] = useState('')
   const [optionRoles, setOptionRoles] = useState<{ label: string; value: string }[]>([])
   const [isDisabledRole, setIsDisabledRole] = useState(false)
-
   const [optionCities, setOptionCities] = useState<{ label: string; value: string }[]>([])
 
-  const { user } = useAuth()
-
-  //theme
-  const theme = useTheme()
-
-  //translate
+  // ** Hooks
   const { i18n } = useTranslation()
 
-  //dispatch
+  // ** theme
+  const theme = useTheme()
+
+  // ** redux
   const dispatch: AppDispatch = useDispatch()
   const { isLoading, isErrorUpdateMe, messageUpdateMe, isSuccessUpdateMe } = useSelector(
     (state: RootState) => state.auth
   )
 
-  const schema = yup.object({
-    email: yup.string().required('the field is required').matches(EMAIL_REG, 'the email is must email type'),
+  const schema = yup.object().shape({
+    email: yup.string().required(t('Required_field')).matches(EMAIL_REG, 'The field is must email type'),
     fullName: yup.string().notRequired(),
     phoneNumber: yup.string().required(t('Required_field')).min(9, 'The phone number is min 9 number'),
     role: isDisabledRole ? yup.string().notRequired() : yup.string().required(t('Required_field')),
@@ -116,7 +108,7 @@ const MyProfilePage: NextPage<TProps> = () => {
     resolver: yupResolver(schema)
   })
 
-  //fetch api
+  // fetch api
   const fetchGetAuthMe = async () => {
     setLoading(true)
     await getAuthMe()
@@ -125,7 +117,6 @@ const MyProfilePage: NextPage<TProps> = () => {
         const data = response?.data
         if (data) {
           setIsDisabledRole(!data?.role?.permissions?.length)
-          // setRoleId(data?.role._id)
           reset({
             email: data?.email,
             address: data?.address,
@@ -142,7 +133,6 @@ const MyProfilePage: NextPage<TProps> = () => {
       })
   }
 
-  //fetch all roles
   const fetchAllRoles = async () => {
     setLoading(true)
     await getAllRoles({ params: { limit: -1, page: -1 } })
@@ -150,6 +140,21 @@ const MyProfilePage: NextPage<TProps> = () => {
         const data = res?.data.roles
         if (data) {
           setOptionRoles(data?.map((item: { name: string; _id: string }) => ({ label: item.name, value: item._id })))
+        }
+        setLoading(false)
+      })
+      .catch(e => {
+        setLoading(false)
+      })
+  }
+
+  const fetchAllCities = async () => {
+    setLoading(true)
+    await getAllCities({ params: { limit: -1, page: -1 } })
+      .then(res => {
+        const data = res?.data.cities
+        if (data) {
+          setOptionCities(data?.map((item: { name: string; _id: string }) => ({ label: item.name, value: item._id })))
         }
         setLoading(false)
       })
@@ -176,6 +181,7 @@ const MyProfilePage: NextPage<TProps> = () => {
 
   useEffect(() => {
     fetchAllRoles()
+    fetchAllCities()
   }, [])
 
   const onSubmit = (data: any) => {
@@ -189,11 +195,12 @@ const MyProfilePage: NextPage<TProps> = () => {
         role: data.role,
         phoneNumber: data.phoneNumber,
         avatar,
-        address: data.address
-        // city: data.city
+        address: data.address,
+        city: data.city
       })
     )
   }
+
   const handleUploadAvatar = async (file: File) => {
     const base64 = await convertBase64(file)
     setAvatar(base64 as string)
@@ -202,7 +209,7 @@ const MyProfilePage: NextPage<TProps> = () => {
   return (
     <>
       {loading || (isLoading && <Spinner />)}
-      <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} autoComplete='off' noValidate>
         <Grid container>
           <Grid
             container
@@ -211,12 +218,7 @@ const MyProfilePage: NextPage<TProps> = () => {
             xs={12}
             sx={{ backgroundColor: theme.palette.background.paper, borderRadius: '15px', py: 5, px: 4 }}
           >
-            <Box
-              sx={{
-                height: '100%',
-                width: '100%'
-              }}
-            >
+            <Box sx={{ height: '100%', width: '100%' }}>
               <Grid container spacing={4}>
                 <Grid item md={12} xs={12}>
                   <Box
@@ -224,9 +226,9 @@ const MyProfilePage: NextPage<TProps> = () => {
                       width: '100%',
                       height: '100%',
                       display: 'flex',
+                      flexDirection: 'column',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      flexDirection: 'column',
                       gap: 2
                     }}
                   >
@@ -257,7 +259,6 @@ const MyProfilePage: NextPage<TProps> = () => {
                         </Avatar>
                       )}
                     </Box>
-
                     <WrapperFileUpload
                       uploadFunc={handleUploadAvatar}
                       objectAcceptFile={{
@@ -296,7 +297,7 @@ const MyProfilePage: NextPage<TProps> = () => {
                   />
                 </Grid>
                 <Grid item md={6} xs={12}>
-                  {isDisabledRole && (
+                  {!isDisabledRole && (
                     <Controller
                       control={control}
                       rules={{
@@ -314,7 +315,6 @@ const MyProfilePage: NextPage<TProps> = () => {
                                 : `rgba(${theme.palette.customColors.main}, 0.42)`
                             }}
                           >
-                            {' '}
                             {t('Role')} <span style={{ color: theme.palette.error.main }}>*</span>
                           </label>
                           <CustomSelect
@@ -347,6 +347,7 @@ const MyProfilePage: NextPage<TProps> = () => {
               </Grid>
             </Box>
           </Grid>
+
           <Grid container item md={6} xs={12} mt={{ md: 0, xs: 5 }}>
             <Box
               sx={{
@@ -357,10 +358,7 @@ const MyProfilePage: NextPage<TProps> = () => {
                 py: 5,
                 px: 4
               }}
-              marginLeft={{
-                md: 5,
-                xs: 0
-              }}
+              marginLeft={{ md: 5, xs: 0 }}
             >
               <Grid container spacing={4}>
                 <Grid item md={6} xs={12}>
@@ -384,6 +382,7 @@ const MyProfilePage: NextPage<TProps> = () => {
                 <Grid item md={6} xs={12}>
                   <Controller
                     control={control}
+                    name='address'
                     render={({ field: { onChange, onBlur, value } }) => (
                       <CustomTextField
                         fullWidth
@@ -394,7 +393,6 @@ const MyProfilePage: NextPage<TProps> = () => {
                         placeholder={t('Enter_your_address')}
                       />
                     )}
-                    name='address'
                   />
                 </Grid>
                 <Grid item md={6} xs={12}>
@@ -444,6 +442,7 @@ const MyProfilePage: NextPage<TProps> = () => {
                     control={control}
                     render={({ field: { onChange, onBlur, value } }) => (
                       <CustomTextField
+                        required
                         fullWidth
                         label={t('Phone_number')}
                         onChange={e => {
@@ -455,10 +454,10 @@ const MyProfilePage: NextPage<TProps> = () => {
                           pattern: '[0-9]*',
                           minLength: 8
                         }}
-                        value={value}
                         onBlur={onBlur}
-                        error={Boolean(errors?.phoneNumber)}
+                        value={value}
                         placeholder={t('Enter_your_phone')}
+                        error={Boolean(errors?.phoneNumber)}
                         helperText={errors?.phoneNumber?.message}
                       />
                     )}

@@ -42,7 +42,7 @@ import { convertBase64, convertHTMLToDraft, formatNumberToLocal, stringToSlug } 
 import { createProductAsync, updateProductAsync } from 'src/stores/product/actions'
 import { getAllProductTypes } from 'src/services/product-type'
 import CustomDatePicker from 'src/components/custom-data-picker'
-import CustomEditor from  'src/components/custom-editor'
+import CustomEditor from 'src/components/custom-editor'
 import { EditorState, convertToRaw } from 'draft-js'
 import draftToHtml from 'draftjs-to-html'
 import { getDetailsProduct } from 'src/services/product'

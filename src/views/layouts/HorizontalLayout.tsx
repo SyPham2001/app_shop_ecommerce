@@ -22,6 +22,7 @@ import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
 import Link from 'next/link'
 import { ROUTE_CONFIG } from 'src/configs/route'
+import CartProduct from './components/cart-product'
 
 const drawerWidth: number = 240
 
@@ -98,7 +99,7 @@ const HorizontalLayout: NextPage<TProps> = ({ open, toggleDrawer, isHideMenu }) 
           </IconButton>
         )}
 
-<Typography
+        <Typography
           component='h1'
           variant='h6'
           color='primary'
@@ -111,6 +112,7 @@ const HorizontalLayout: NextPage<TProps> = ({ open, toggleDrawer, isHideMenu }) 
         </Typography>
         <LanguageDropDown />
         <ModeToggle />
+        <CartProduct />
         {user ? (
           <UserDropDown />
         ) : (

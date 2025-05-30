@@ -1,17 +1,24 @@
-import * as React from 'react'
+import React, { useMemo } from 'react'
 import { styled } from '@mui/material/styles'
 import Card from '@mui/material/Card'
 import CardMedia from '@mui/material/CardMedia'
 import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
-import { Box, Rating, useTheme } from '@mui/material'
+import { Box, IconButton, Rating, useTheme } from '@mui/material'
 import { Button } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { TProduct } from 'src/types/product'
-import { formatNumberToLocal } from 'src/utils'
+import { convertUpdateProductToCart, formatNumberToLocal, isExpiry } from 'src/utils'
 import { hexToRGBA } from 'src/utils/hex-to-rgba'
 import Icon from 'src/components/Icon'
 import { useAuth } from 'src/hooks/useAuth'
+import { useRouter } from 'next/router'
+import { ROUTE_CONFIG } from 'src/configs/route'
+import { AppDispatch, RootState } from 'src/stores'
+import { useDispatch, useSelector } from 'react-redux'
+import { updateProductToCart } from 'src/stores/order-product'
+import { getLocalProductCart, setLocalProductToCart } from 'src/helpers/storage'
+import { likeProductAsync, unLikeProductAsync } from 'src/stores/product/actions'
 
 interface TCardProduct {
   item: TProduct
@@ -32,12 +39,72 @@ const CardProduct = (props: TCardProduct) => {
   const theme = useTheme()
   const { t } = useTranslation()
   const { user } = useAuth()
+  const router = useRouter()
+
+  //*Redux
+  const dispatch: AppDispatch = useDispatch()
+  const { orderItems } = useSelector((state: RootState) => state.orderProduct)
+
+  //** Handle */
+  const handleNavigateDetails = (slug: string) => {
+    router.push(`${ROUTE_CONFIG.PRODUCT}/${slug}`)
+  }
+
+  const handleUpdateProductToCart = (item: TProduct) => {
+    const productCart = getLocalProductCart()
+    const parseData = productCart ? JSON.parse(productCart) : {}
+    const discountItem = isExpiry(item.discountStartDate, item.discountEndDate) ? item.discount : 0
+
+    const listOrderItems = convertUpdateProductToCart(orderItems, {
+      name: item.name,
+      amount: 1,
+      image: item.image,
+      price: item.price,
+      discount: discountItem,
+      product: item._id,
+      slug: item.slug
+    })
+
+    if (user?._id) {
+      dispatch(
+        updateProductToCart({
+          orderItems: listOrderItems
+        })
+      )
+      setLocalProductToCart({ ...parseData, [user?._id]: listOrderItems })
+    } else {
+      router.replace({
+        pathname: '/login',
+        query: { returnUrl: router.asPath }
+      })
+    }
+  }
+
+  const handleToggleLikeProduct = (id: string, isLiked: boolean) => {
+    if (user?._id) {
+      if (isLiked) {
+        dispatch(unLikeProductAsync({ productId: id }))
+      } else {
+        dispatch(likeProductAsync({ productId: id }))
+      }
+    } else {
+      router.replace({
+        pathname: '/login',
+        query: { returnUrl: router.asPath }
+      })
+    }
+  }
+
+  const memoIsExpiry = useMemo(() => {
+    return isExpiry(item.discountStartDate, item.discountEndDate)
+  }, [item])
 
   return (
     <StyleCard sx={{ width: '100%' }}>
       <CardMedia component='img' height='194' image={item.image} alt='image' />
       <CardContent sx={{ padding: '8px 12px' }}>
         <Typography
+          onClick={() => handleNavigateDetails(item.slug)}
           variant='h5'
           sx={{
             color: theme.palette.primary.main,
@@ -74,13 +141,37 @@ const CardProduct = (props: TCardProduct) => {
               fontSize: '18px'
             }}
           >
-            {item.discount > 0 ? (
+            {item.discount > 0 && memoIsExpiry ? (
               <>{formatNumberToLocal((item.price * (100 - item.discount)) / 100)}</>
             ) : (
               <>{formatNumberToLocal(item.price)}</>
             )}{' '}
             VND
           </Typography>
+          {item.discount > 0 && memoIsExpiry && (
+            <Box
+              sx={{
+                backgroundColor: hexToRGBA(theme.palette.error.main, 0.42),
+                width: '36px',
+                height: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '2px'
+              }}
+            >
+              <Typography
+                variant='h6'
+                sx={{
+                  color: theme.palette.error.main,
+                  fontSize: '10px',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                - {item.discount} %
+              </Typography>
+            </Box>
+          )}
         </Box>
         {item.countInStock > 0 ? (
           <Typography variant='body2' color='text.secondary' sx={{ my: 1 }}>
@@ -202,15 +293,15 @@ const CardProduct = (props: TCardProduct) => {
               {!!item.totalReviews ? <b>{item.totalReviews}</b> : <span>{t('not_review')}</span>}
             </Typography>
           </Box>
-          {/* <IconButton
-          // onClick={() => handleToggleLikeProduct(item._id, Boolean(user && item?.likedBy?.includes(user._id)))}
+          <IconButton
+            onClick={() => handleToggleLikeProduct(item._id, Boolean(user && item?.likedBy?.includes(user._id)))}
           >
             {user && item?.likedBy?.includes(user._id) ? (
               <Icon icon='mdi:heart' style={{ color: theme.palette.primary.main }} />
             ) : (
               <Icon icon='tabler:heart' style={{ color: theme.palette.primary.main }} />
             )}
-          </IconButton> */}
+          </IconButton>
         </Box>
       </CardContent>
 
@@ -226,7 +317,7 @@ const CardProduct = (props: TCardProduct) => {
             fontWeight: 'bold'
           }}
           disabled={item.countInStock < 1}
-          // onClick={() => handleUpdateProductToCart(item)}
+          onClick={() => handleUpdateProductToCart(item)}
         >
           <Icon icon='bx:cart' fontSize={24} style={{ position: 'relative', top: '-2px' }} />
           {t('Add_to_cart')}

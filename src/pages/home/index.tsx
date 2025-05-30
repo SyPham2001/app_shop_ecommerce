@@ -49,7 +49,7 @@ export default function Home(props: TProps) {
 Home.getLayout = (page: ReactNode) => <LayoutNotApp>{page}</LayoutNotApp>
 Home.guestGuard = false
 Home.authGuard = false
-Home.title = 'Danh sách sản phẩm của cửa hàng Gearvn'
+Home.title = 'Danh sách sản phẩm của cửa hàng SPShop'
 
 export async function getServerSideProps() {
   const limit = 10
