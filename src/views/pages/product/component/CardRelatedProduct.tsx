@@ -51,7 +51,7 @@ const CardRelatedProduct = (props: TCardRelatedProduct) => {
 
   // ** Redux
   const dispatch: AppDispatch = useDispatch()
-  
+
   // ** handle
   const handleNavigateDetails = (slug: string) => {
     router.push(`${ROUTE_CONFIG.PRODUCT}/${slug}`)
