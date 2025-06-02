@@ -14,7 +14,7 @@ import { Box, Grid, Typography, useTheme, Tab, Tabs, TabsProps } from '@mui/mate
 import Spinner from 'src/components/spinner'
 import CustomPagination from 'src/components/custom-pagination'
 import CardProduct from '../product/component/CardProduct'
-import FilterProduct from '../product/component/FilterProduct'
+// import FilterProduct from 'src/views/pages/product/components/FilterProduct'
 import InputSearch from 'src/components/input-search'
 import NoData from 'src/components/no-data'
 
@@ -39,7 +39,6 @@ import CustomSelect from 'src/components/custom-select'
 import CardSkeleton from '../product/component/CardSkeletion'
 // import ChatBotAI from 'src/components/chat-bot-ai'
 import { useRouter } from 'next/router'
-import { ROUTE_CONFIG } from 'src/configs/route'
 
 interface TOptions {
   label: string
@@ -72,10 +71,6 @@ const StyledTabs = styled(Tabs)<TabsProps>(({ theme }) => ({
 const HomePage: NextPage<TProps> = props => {
   // ** Translate
   const { t } = useTranslation()
-
-  //** Hooks
-  const router = useRouter();
-
 
   // ** Props
   const { products, totalCount, paramsServer, productTypesServer } = props
@@ -125,7 +120,7 @@ const HomePage: NextPage<TProps> = props => {
 
   // ** theme
   const theme = useTheme()
-
+  const router = useRouter()
 
   // fetch api
   const handleGetListProducts = async () => {
@@ -175,8 +170,6 @@ const HomePage: NextPage<TProps> = props => {
     setLocationSelected('')
     setReviewSelected('')
   }
-
-
 
   // ** fetch api
   const fetchAllTypes = async () => {
@@ -363,13 +356,13 @@ const HomePage: NextPage<TProps> = props => {
           >
             <Grid item md={3} display={{ md: 'flex', xs: 'none' }}>
               <Box sx={{ width: '100%' }}>
-                <FilterProduct
+                {/* <FilterProduct
                   locationSelected={locationSelected}
                   reviewSelected={reviewSelected}
                   handleReset={handleResetFilter}
                   optionCities={optionCities}
                   handleFilterProduct={handleFilterProduct}
-                />
+                /> */}
               </Box>
             </Grid>
             <Grid item md={9} xs={12}>

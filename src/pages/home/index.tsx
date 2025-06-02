@@ -51,51 +51,51 @@ Home.guestGuard = false
 Home.authGuard = false
 Home.title = 'Danh sách sản phẩm của cửa hàng SPShop'
 
-export async function getServerSideProps() {
-  const limit = 10
-  const page = 1
-  const order = 'createdAt desc'
-  try {
-    const productTypes: TOptions[] = []
-    await getAllProductTypes({ params: { limit: -1, page: -1 } }).then(res => {
-      const data = res?.data.productTypes
-      if (data) {
-        data?.map((item: { name: string; _id: string }) => {
-          productTypes.push({ label: item.name, value: item._id })
-        })
-      }
-    })
+// export async function getServerSideProps() {
+//   const limit = 10
+//   const page = 1
+//   const order = 'createdAt desc'
+//   try {
+//     const productTypes: TOptions[] = []
+//     await getAllProductTypes({ params: { limit: -1, page: -1 } }).then(res => {
+//       const data = res?.data.productTypes
+//       if (data) {
+//         data?.map((item: { name: string; _id: string }) => {
+//           productTypes.push({ label: item.name, value: item._id })
+//         })
+//       }
+//     })
 
-    const res = await getAllProductsPublic({
-      params: { limit: limit, page: page, order, productType: productTypes?.[0]?.value }
-    })
+//     const res = await getAllProductsPublic({
+//       params: { limit: limit, page: page, order, productType: productTypes?.[0]?.value }
+//     })
 
-    const data = res?.data
+//     const data = res?.data
 
-    return {
-      props: {
-        products: data?.products,
-        totalCount: data?.totalCount,
-        productTypes: productTypes,
-        params: {
-          limit,
-          page,
-          order,
-          productType: productTypes?.[0]?.value
-        }
-      }
-    }
-  } catch (error) {
-    return {
-      props: {
-        products: [],
-        totalCount: 0,
-        params: {
-          limit,
-          page,
-          order
-        }
-      }
-    }
-  }
-}
+//     return {
+//       props: {
+//         products: data?.products,
+//         totalCount: data?.totalCount,
+//         productTypes: productTypes,
+//         params: {
+//           limit,
+//           page,
+//           order,
+//           productType: productTypes?.[0]?.value
+//         }
+//       }
+//     }
+//   } catch (error) {
+//     return {
+//       props: {
+//         products: [],
+//         totalCount: 0,
+//         params: {
+//           limit,
+//           page,
+//           order
+//         }
+//       }
+//     }
+//   }
+// }
